@@ -14,6 +14,7 @@ request = {
         'data' : {
             # NOTE:
             # pass key, value pairs of assets, tickers HERE
+            # manual or replaced with generated JSON
         }
     }
 }
