@@ -20,10 +20,10 @@ request = {
 }
 
 
-# NOTE: zoznam podporovanych data sources:
+# NOTE: list of supported data sources (built-in):
 
 # Yahoo:    YES
-# Polygon:  NO
+# Polygon:  NO                 
 # EODH:     NO
 
 
