@@ -9,7 +9,7 @@ DEV = False
 # Data
 
 CQ_DATA_DIR_PATH_DEV = './Web/data/'
-CQ_DATA_DIR_PATH = './Data/PROD/'
+CQ_DATA_DIR_PATH = './Data/CQ/PROD/'
 CQ_DATA_FILE_PATH = 'CQ_DATA_PROD_2_ENHANCED.csv'
 
 # Mappings
@@ -35,3 +35,9 @@ CMAP_BACKEND_MAPPING = {
 
 CMAPS = px.colors.named_colorscales()
 
+# Shiny
+
+RUN_CONFIG = {
+    'file_path' : CQ_DATA_DIR_PATH,
+    'file' : CQ_DATA_FILE_PATH
+}

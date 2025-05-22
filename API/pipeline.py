@@ -35,7 +35,7 @@ def run_cq_pipeline(request):
 
     output_params = request["content"].get("output_params", {})
 
-    if output_params.pop('save_file'):
+    if output_params.pop('save_file', False):
         cqgram.save_results(**output_params)
 
     # ---
