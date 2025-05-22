@@ -67,8 +67,8 @@ class Yahoo(Source):
         for name, ticker in self.ticker_mapping.items():
             ticker_data = self.fetch(ticker, start, end, period).reset_index()
             ticker_data['ticker'] = name
-            ticker_data['start'] = start
-            ticker_data['end'] = end
+            ticker_data['start'] = str(start)
+            ticker_data['end'] = str(end)
             result.append(ticker_data)
         
         result = pd.concat(result, ignore_index=True)

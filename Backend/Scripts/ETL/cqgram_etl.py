@@ -84,7 +84,7 @@ class CQGramPipeline(DataTransformer):
         self.data['candidates'] = {}
 
         for group, df in data.groupby('ticker'):        
-            df_copy = df.copy().sort_values(by='Date')
+            df_copy = df.copy().sort_values(by='Date').set_index('Date')
             df_copy = self.compute_log_returns(df_copy)
             self.data['benchmarks'][group] = df_copy
             self.data['candidates'][group] = df_copy
@@ -110,8 +110,8 @@ class CQGramPipeline(DataTransformer):
     
     @staticmethod
     def add_timestamp(result, start, end):
-        result['date_start'] = start
-        result['date_end'] = end
+        result['date_start'] = str(start)
+        result['date_end'] = str(end)
         return result
     
 
@@ -230,10 +230,19 @@ class CQGramPipeline(DataTransformer):
         return pd.concat(rows, ignore_index=True)
 
 
-    def save_results(self, path, **kwargs):
+    def save_results(self, path=None, **kwargs):
+        if path is None:
+            file_dir = kwargs.pop('output_dir', './') if not None else './'
+            file = kwargs.pop('output_file', 'file.csv') if not None else 'file.csv'
+            path = file_dir + file
+
         df = self.create_dataframe_from_cqgram(self.current_output)
         df.to_csv(path, **kwargs)
 
+
+    def save_results_to_db(self, **kwargs):
+        # NOTE: TODO: database compatible implementation
+        pass
 
 
 # ---
