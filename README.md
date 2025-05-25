@@ -38,3 +38,5 @@ Opis JSON atribútov:
 
 Pre testovanie Shiny web app prejdite do domovského priečinku projektu a spustite ./app.py
 využitím príkazu 'shiny run --reload --launch-browser app.py' alebo využitím VSCode extenzie Shiny.
+
+IMPORTANT: vizualizácia vlastných výsledkov nieje ešte plne podporovaná, nájdete ju ale na DEV branch. Výpočty fungujú správne.

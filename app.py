@@ -32,7 +32,13 @@ from Frontend.Scripts.data import *
 # data load
 
 data = pd.read_csv(CQ_DATA_DIR_PATH + '/' + CQ_DATA_FILE_PATH)
+custom_data = pd.read_csv('./Data/CQ/Tests/api_test.csv')
 
+available_data_files = os.listdir(CQ_DATA_DIR_PATH)
+available_custom_data_files = os.listdir('./Data/CQ/Tests/')
+
+if not available_custom_data_files:
+    available_custom_data_files = ['-']
 
 # APPLICATION PART
 
@@ -52,6 +58,7 @@ with ui.nav_panel('Heatmaps'):
     with ui.layout_sidebar(fillable=True):
         with ui.sidebar():
             ui.h4('Heatmaps Configuration:')
+            ui.input_select('data_heatmaps', 'Data:', choices=available_data_files, selected=available_data_files[0])
             ui.input_select('period_heatmaps', 'Period:', choices=CRISES, selected=CRISES[0])
             ui.input_select('phase_heatmaps', 'Phase:', choices=PHASES, selected=PHASES[0])
             ui.input_select('asset_heatmaps', 'Asset:', choices=ALL_ASSETS, selected=ALL_ASSETS[0])
@@ -156,6 +163,7 @@ with ui.nav_panel('Networks'):
     with ui.layout_sidebar(fillable=True):
         with ui.sidebar():
             ui.h4('Network Configuration:')
+            ui.input_select('data_network', 'Data:', choices=available_data_files, selected=available_data_files[0])
             ui.input_select('period_network', 'Period:', choices=CRISES, selected=CRISES[0])
             ui.input_select('phase_network', 'Phase:', choices=PHASES, selected=PHASES[0])
             ui.input_select('tau_x_network', 'Tau X:', choices=TAU_SPECTRUM, selected=TAU_SPECTRUM[0])
@@ -172,13 +180,45 @@ with ui.nav_panel('Networks'):
             return ui.HTML(net.generate_html(notebook=False))
 
 
-with ui.nav_panel('Info'):
-    pass
+# ================================= CUSTOM
 
+with ui.nav_panel('Custom Networks'):
+    with ui.layout_sidebar(fillable=True):
+        with ui.sidebar():
+            ui.h4('Custom Network Configuration:')
+            ui.input_select('data_custom_network', 'Data:', choices=available_custom_data_files, selected=available_data_files[0])
+            ui.input_select('start_custom_network', 'Start:', choices=CRISES, selected=CRISES[0])
+            ui.input_select('end_custom_network', 'End:', choices=PHASES, selected=PHASES[0])
+            ui.input_select('tau_x_custom_network', 'Tau X:', choices=TAU_SPECTRUM, selected=TAU_SPECTRUM[0])
+            ui.input_select('tau_y_custom_network', 'Tau Y:', choices=TAU_SPECTRUM, selected=TAU_SPECTRUM[-1])
 
+        #with ui.card(fill=True, idd='network_card'):
+        @render.ui
+        def network_visualization_custom():
+            subset = filter_data_networks_custom()
+            G = create_network(subset)
+            G = decorate_for_pyvis(G)
+            net = show_pyvis(G)
+            
+            return ui.HTML(net.generate_html(notebook=False))
 
 
 # NOTE: Reactive funckie -> SERVER BACKEND
+
+def reload_data(file):
+    global data
+    try:
+        data = pd.read_csv(file)
+    except:
+        pass
+
+def reload_custom_data(file):
+    global custom_data
+    try:
+        custom_data = pd.read_csv(file)
+    except:
+        pass
+
 
 # SUMMARY PAGE
 
@@ -187,12 +227,15 @@ with ui.nav_panel('Info'):
 @reactive.calc
 def filter_data_heatmaps():
 
+    data_file = input.data_heatmaps()
     period = input.period_heatmaps()
     phase = input.phase_heatmaps()
 
     # BUG: FIXED: period, phase -> mappin[period], mapping[phase]
     #print("Reaction")
     #print(period, phase)
+
+    reload_data(CQ_DATA_DIR_PATH + data_file)
 
     period = PERIOD_BACKEND_MAPPING.get(period, '')
     phase = PHASE_BACKEND_MAPPING.get(phase, '')
@@ -213,11 +256,14 @@ def filter_data_heatmaps():
 @reactive.calc
 def filter_data_networks():
 
+    data_file = input.data_network()
     period = input.period_network()
     phase = input.phase_network()
 
     tau1 = float(input.tau_x_network())
     tau2 = float(input.tau_y_network())
+
+    reload_data(CQ_DATA_DIR_PATH + data_file)
 
     period = PERIOD_BACKEND_MAPPING.get(period, '')
     phase = PHASE_BACKEND_MAPPING.get(phase, '')
@@ -226,6 +272,23 @@ def filter_data_networks():
         data.pipe(select_period, period)
         .pipe(select_phase, phase)
     )
+
+    subset = subset.query('tau1 == @tau1 and tau2 in (@tau1, @tau2)')
+
+    return subset
+
+
+@reactive.calc
+def filter_data_networks_custom():
+
+    data_file = input.data_custom_network()
+
+    tau1 = float(input.tau_x_custom_network())
+    tau2 = float(input.tau_y_custom_network())
+
+    reload_custom_data(CQ_DATA_DIR_PATH + data_file)
+
+    subset = custom_data
 
     subset = subset.query('tau1 == @tau1 and tau2 in (@tau1, @tau2)')
 
